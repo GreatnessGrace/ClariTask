@@ -7,7 +7,7 @@ export async function POST(request) {
 
   await axios.post("http://localhost:5000/api/todos", { title, description });
 
-  return Response.redirect("http://localhost:3000/todos");
+  return Response.redirect("http://localhost:3000/");
 }
 
 export async function PUT(request, { params }) {
