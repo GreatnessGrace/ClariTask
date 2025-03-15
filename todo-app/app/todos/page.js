@@ -192,7 +192,30 @@ export default function TodosPage() {
               </button>
             </div>
           ) : (
-            <p>Select a todo from the sidebar to edit.</p>
+            <div style={{ margin: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <h1
+                  style={{
+                    font: "bold",
+                    fontSize: "45px",
+                    marginBottom: "5px",
+                  }}
+                >
+                  {" "}
+                  New Additions
+                </h1>
+                icon
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                icon1, icon2, icon3, icon4, icon5
+              </div>
+              <hr
+                style={{ font: "45px", color: "gray", marginTop: "5px" }}
+              ></hr>
+              <p style={{ marginTop: "15px" }}>
+                Select a todo from the sidebar to edit.
+              </p>
+            </div>
           )}
         </div>
       </div>
