@@ -29,7 +29,6 @@ export default function TodosPage() {
   const [editTitle, setEditTitle] = React.useState("");
   const [editDescription, setEditDescription] = React.useState("");
 
-  // Fetch Todos
   React.useEffect(() => {
     const loadTodos = async () => {
       const data = await fetchTodos(page);
@@ -38,7 +37,6 @@ export default function TodosPage() {
     loadTodos();
   }, [page]);
 
-  // Fetch Selected Todo
   React.useEffect(() => {
     if (selectedTodoId) {
       const loadTodo = async () => {
@@ -83,6 +81,15 @@ export default function TodosPage() {
 
   const { todos, total, limit } = todosData;
 
+  const renderIconsAndLine = () => (
+    <>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        icon1, icon2, icon3, icon4, icon5
+      </div>
+      <hr style={{ font: "45px", color: "gray", marginTop: "5px" }}></hr>
+    </>
+  );
+
   return (
     <>
       <div style={{ width: "10%", margin: "5px 25px" }}>
@@ -96,7 +103,6 @@ export default function TodosPage() {
           fontFamily: "Arial, sans-serif",
         }}
       >
-        {/* Sidebar */}
         <div
           style={{
             width: "300px",
@@ -119,7 +125,6 @@ export default function TodosPage() {
             ➕ Add Todo
           </button>
 
-          {/* List of Todos */}
           <ul style={{ listStyle: "none", padding: 0 }}>
             {todos.map((todo) => (
               <li key={todo._id} style={{ marginBottom: "10px" }}>
@@ -145,7 +150,6 @@ export default function TodosPage() {
           </ul>
         </div>
 
-        {/* Edit Todo Panel */}
         <div
           style={{
             flex: 1,
@@ -167,6 +171,7 @@ export default function TodosPage() {
                   padding: "10px",
                 }}
               />
+              {renderIconsAndLine()}
               <textarea
                 value={editDescription}
                 onChange={(e) => setEditDescription(e.target.value)}
@@ -193,25 +198,12 @@ export default function TodosPage() {
             </div>
           ) : (
             <div style={{ margin: "10px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <h1
-                  style={{
-                    font: "bold",
-                    fontSize: "45px",
-                    marginBottom: "5px",
-                  }}
-                >
-                  {" "}
-                  New Additions
-                </h1>
-                icon
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                icon1, icon2, icon3, icon4, icon5
-              </div>
-              <hr
-                style={{ font: "45px", color: "gray", marginTop: "5px" }}
-              ></hr>
+              <h1
+                style={{ font: "bold", fontSize: "45px", marginBottom: "5px" }}
+              >
+                New Additions
+              </h1>
+              {renderIconsAndLine()}
               <p style={{ marginTop: "15px" }}>
                 Select a todo from the sidebar to edit.
               </p>
