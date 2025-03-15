@@ -1,13 +1,36 @@
+"use client";
+
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export default function TodoDetailPage({ params }) {
   const router = useRouter();
+  const [todo, setTodo] = useState({ title: "", description: "" });
+
+  useEffect(() => {
+    const fetchTodo = async () => {
+      try {
+        console.log("Fetching Todo with ID:", params.id);
+        const res = await fetch(`/api/todos/${params.id}`);
+        if (!res.ok) throw new Error("Failed to fetch todo");
+        const data = await res.json();
+        setTodo(data);
+      } catch (error) {
+        console.error("Fetch error:", error);
+      }
+    };
+
+    if (params.id) fetchTodo();
+  }, [params.id]);
 
   const handleUpdate = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const title = formData.get("title");
-    const description = formData.get("description");
+    e.preventDefault(); // ❌ Prevents form from making a GET request
+
+    console.log("Updating Todo with ID:", params.id);
+    console.log("Data Sent:", {
+      title: todo.title,
+      description: todo.description,
+    });
 
     try {
       const res = await fetch(`/api/todos/${params.id}`, {
@@ -15,7 +38,10 @@ export default function TodoDetailPage({ params }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ title, description }),
+        body: JSON.stringify({
+          title: todo.title,
+          description: todo.description,
+        }),
       });
 
       if (res.ok) {
@@ -33,15 +59,15 @@ export default function TodoDetailPage({ params }) {
     <div style={{ flex: 1, padding: "20px" }}>
       <h2 style={{ fontSize: "20px", marginBottom: "20px" }}>Edit Todo</h2>
       <form
-        action={`/api/todos/${todo._id}`}
-        method="POST"
+        onSubmit={handleUpdate} // ✅ Now properly handles update
         style={{ display: "flex", flexDirection: "column", gap: "10px" }}
       >
-        <input type="hidden" name="_method" value="PUT" />
         <input
           type="text"
           name="title"
-          defaultValue={todo.title}
+          value={todo.title}
+          onChange={(e) => setTodo({ ...todo, title: e.target.value })}
+          required
           style={{
             padding: "10px",
             fontSize: "16px",
@@ -51,7 +77,9 @@ export default function TodoDetailPage({ params }) {
         />
         <textarea
           name="description"
-          defaultValue={todo.description}
+          value={todo.description}
+          onChange={(e) => setTodo({ ...todo, description: e.target.value })}
+          required
           style={{
             padding: "10px",
             fontSize: "16px",
@@ -64,7 +92,7 @@ export default function TodoDetailPage({ params }) {
           type="submit"
           style={{
             padding: "10px",
-            backgroundColor: "#0070f3",
+            backgroundColor: "black",
             color: "#fff",
             border: "none",
             borderRadius: "5px",

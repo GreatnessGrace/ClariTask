@@ -1,5 +1,8 @@
+"use client";
+import React from "react";
 import Link from "next/link";
 import axios from "axios";
+import { useSearchParams } from "next/navigation";
 
 const fetchTodos = async (page = 1) => {
   const res = await axios.get(`http://localhost:5000/api/todos?page=${page}`);
@@ -11,217 +14,225 @@ const fetchTodo = async (id) => {
   return res.data;
 };
 
-export default async function TodosPage({ searchParams }) {
-  // Await searchParams before using its properties
-  const page = parseInt(searchParams.page) || 1;
-  const selectedTodoId = searchParams.id;
+export default function TodosPage() {
+  const searchParams = useSearchParams();
+  const page = parseInt(searchParams.get("page")) || 1;
+  const selectedTodoId = searchParams.get("id");
 
-  // Fetch todos and selected todo
-  const { todos, total, limit } = await fetchTodos(page);
-  const selectedTodo = selectedTodoId ? await fetchTodo(selectedTodoId) : null;
+  const [todosData, setTodosData] = React.useState({
+    todos: [],
+    total: 0,
+    limit: 10,
+  });
+  const [selectedTodo, setSelectedTodo] = React.useState(null);
+
+  // Fetch Todos
+  React.useEffect(() => {
+    const loadTodos = async () => {
+      const data = await fetchTodos(page);
+      setTodosData(data);
+    };
+    loadTodos();
+  }, [page]);
+
+  // Fetch Selected Todo
+  React.useEffect(() => {
+    if (selectedTodoId) {
+      const loadTodo = async () => {
+        const data = await fetchTodo(selectedTodoId);
+        setSelectedTodo(data);
+      };
+      loadTodo();
+    }
+  }, [selectedTodoId]);
+
+  const { todos, total, limit } = todosData;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        height: "100vh",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      <h1 style={{ fontSize: "24px", marginBottom: "20px" }}>Todo</h1>
+    <>
+      <div style={{ width: "10%", margin: "5px 25px" }}>
+        <h1 style={{ fontSize: "24px", marginBottom: "20px" }}>📝 Todo</h1>
+      </div>
 
-      {/* Sidebar */}
       <div
         style={{
-          width: "300px",
-          backgroundColor: "#f4f4f4",
-          padding: "20px",
-          borderRight: "1px solid #ddd",
+          display: "flex",
+          height: "100vh",
+          fontFamily: "Arial, sans-serif",
         }}
       >
-        {/* Button to Add New Todo */}
-        <Link
-          href="/todos/new"
-          style={{
-            display: "block",
-            padding: "10px",
-            backgroundColor: "black",
-            color: "#fff",
-            width: "50%",
-            textAlign: "center",
-            borderRadius: "5px",
-            textDecoration: "none",
-            marginBottom: "20px",
-          }}
-        >
-          icon Todo
-        </Link>
-        {/* List of Todos */}
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {todos.map((todo) => (
-            <li key={todo._id} style={{ marginBottom: "10px" }}>
-              <Link
-                href={`/todos?page=${page}&id=${todo._id}`}
-                style={{
-                  display: "block",
-                  padding: "10px",
-                  backgroundColor: "#fff",
-                  borderRadius: "5px",
-                  textDecoration: "none",
-                  color: "#333",
-                  border: "1px solid #ddd",
-                }}
-              >
-                <strong>{todo.title}</strong>
-                <p style={{ margin: "5px 0 0", color: "#666" }}>
-                  {todo.description}
-                </p>
-              </Link>
-            </li>
-          ))}
-        </ul>
-        {/* Pagination */}
+        {/* Sidebar */}
         <div
           style={{
-            marginTop: "20px",
-            display: "flex",
-            gap: "10px",
-            justifyContent: "center",
+            width: "300px",
+            backgroundColor: "#f4f4f4",
+            padding: "20px",
+            borderRight: "1px solid #ddd",
           }}
         >
-          {Array.from({ length: Math.ceil(total / limit) }, (_, i) => (
+          <div style={{ display: "flex", justifyContent: "space-around" }}>
             <Link
-              key={i + 1}
-              href={`/todos?page=${i + 1}`}
+              href="/todos/new"
               style={{
-                padding: "5px 10px",
-                backgroundColor: "#0070f3",
+                padding: "10px",
+                backgroundColor: "black",
                 color: "#fff",
+                width: "50%",
+                textAlign: "center",
                 borderRadius: "5px",
                 textDecoration: "none",
+                marginBottom: "20px",
               }}
             >
-              {i + 1}
+              ➕ Add Todo
             </Link>
-          ))}
-        </div>
-      </div>
+            <span>🗑️ Delete</span>
+          </div>
 
-      {/* Right Panel (Edit Todo) */}
-      <div style={{ flex: 1, padding: "20px" }}>
-        {selectedTodo ? (
-          <>
-            <h2 style={{ fontSize: "20px", marginBottom: "20px" }}>
-              Edit Todo
-            </h2>
-            <form
-              id="edit-form"
-              style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-            >
-              <input
-                type="text"
-                name="title"
-                defaultValue={selectedTodo.title}
+          {/* List of Todos */}
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {todos.map((todo) => (
+              <li key={todo._id} style={{ marginBottom: "10px" }}>
+                <Link
+                  href={`/todos?page=${page}&id=${todo._id}`}
+                  style={{
+                    padding: "10px",
+                    backgroundColor: "#fff",
+                    borderRadius: "5px",
+                    textDecoration: "none",
+                    color: "#333",
+                    border: "1px solid #ddd",
+                    display: "block",
+                  }}
+                >
+                  <strong>{todo.title}</strong>
+                  <p style={{ margin: "5px 0 0", color: "#666" }}>
+                    {todo.description}
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          {/* Pagination */}
+          <div
+            style={{
+              marginTop: "20px",
+              display: "flex",
+              gap: "10px",
+              justifyContent: "center",
+            }}
+          >
+            {Array.from({ length: Math.ceil(total / limit) }, (_, i) => (
+              <Link
+                key={i + 1}
+                href={`/todos?page=${i + 1}`}
                 style={{
-                  padding: "10px",
-                  fontSize: "16px",
-                  borderRadius: "5px",
-                  border: "1px solid #ddd",
-                }}
-              />
-              <textarea
-                name="description"
-                defaultValue={selectedTodo.description}
-                style={{
-                  padding: "10px",
-                  fontSize: "16px",
-                  borderRadius: "5px",
-                  border: "1px solid #ddd",
-                  minHeight: "100px",
-                }}
-              />
-              <button
-                type="submit"
-                style={{
-                  padding: "10px",
+                  padding: "5px 10px",
                   backgroundColor: "#0070f3",
                   color: "#fff",
-                  border: "none",
                   borderRadius: "5px",
-                  cursor: "pointer",
+                  textDecoration: "none",
                 }}
               >
-                Update
-              </button>
-            </form>
+                {i + 1}
+              </Link>
+            ))}
+          </div>
+        </div>
 
-            <script>
-              {`
-    document.getElementById('edit-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const title = formData.get('title');
-      const description = formData.get('description');
-      const id = '${selectedTodo._id}';
-
-      try {
-        const response = await fetch('/api/todos/${selectedTodo._id}', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ title, description }),
-        });
-
-        const result = await response.json();
-        if (result.success) {
-          window.location.href = '/todos?id=' + id;
-        } else {
-          alert('Failed to update todo');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred while updating the todo');
-      }
-    });
-  `}
-            </script>
-
-            <script>
-              {`
-                document.getElementById('edit-form').addEventListener('submit', async (e) => {
+        {/* Edit Todo Panel */}
+        <div
+          style={{
+            flex: 1,
+            padding: "20px",
+            margin: "5px",
+            borderRadius: "5px",
+          }}
+        >
+          {selectedTodo ? (
+            <>
+              <h2 style={{ fontSize: "20px", marginBottom: "20px" }}>
+                ✏️ Edit Todo
+              </h2>
+              <form
+                onSubmit={async (e) => {
                   e.preventDefault();
                   const formData = new FormData(e.target);
-                  const title = formData.get('title');
-                  const description = formData.get('description');
-                  const id = '${selectedTodo._id}';
+                  const title = formData.get("title");
+                  const description = formData.get("description");
+                  const id = selectedTodo._id;
 
                   try {
-                    const response = await fetch(\`/api/todos/\${id}\`, {
-                      method: 'PUT',
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      body: JSON.stringify({ title, description }),
-                    });
+                    const response = await fetch(
+                      `http://localhost:5000/api/todos/${id}`,
+                      {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ title, description }),
+                      }
+                    );
 
                     if (response.ok) {
-                      window.location.href = \`/todos?id=\${id}\`;
+                      window.location.href = `/todos?id=${id}`;
                     } else {
-                      alert('Failed to update todo');
+                      alert("Failed to update todo");
                     }
                   } catch (error) {
-                    console.error('Error:', error);
-                    alert('An error occurred while updating the todo');
+                    console.error("Error:", error);
+                    alert("An error occurred while updating the todo");
                   }
-                });
-              `}
-            </script>
-          </>
-        ) : (
-          <p>Select a todo from the sidebar to edit.</p>
-        )}
+                }}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                }}
+              >
+                <input
+                  type="text"
+                  name="title"
+                  defaultValue={selectedTodo.title}
+                  style={{
+                    padding: "10px",
+                    fontSize: "16px",
+                    borderRadius: "5px",
+                    border: "1px solid #ddd",
+                  }}
+                  required
+                />
+                <textarea
+                  name="description"
+                  defaultValue={selectedTodo.description}
+                  style={{
+                    padding: "10px",
+                    fontSize: "16px",
+                    borderRadius: "5px",
+                    border: "1px solid #ddd",
+                    minHeight: "100px",
+                  }}
+                  required
+                />
+                <button
+                  type="submit"
+                  style={{
+                    padding: "10px",
+                    backgroundColor: "#0070f3",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                  }}
+                >
+                  ✅ Update
+                </button>
+              </form>
+            </>
+          ) : (
+            <p>Select a todo from the sidebar to edit.</p>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -59,6 +59,8 @@ app.get("/api/todos", async (req, res) => {
 });
 
 app.put("/api/todos/:id", async (req, res) => {
+  console.log("here", req.params);
+
   const { id } = req.params;
   const { title, description } = req.body;
 
