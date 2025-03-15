@@ -25,6 +25,7 @@ export default function TodosPage() {
     limit: 10,
   });
   const [selectedTodo, setSelectedTodo] = React.useState(null);
+  const [showModal, setShowModal] = React.useState(false);
 
   // Fetch Todos
   React.useEffect(() => {
@@ -45,6 +46,24 @@ export default function TodosPage() {
       loadTodo();
     }
   }, [selectedTodoId]);
+
+  const handleAddTodo = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const title = formData.get("title");
+    const description = formData.get("description");
+
+    try {
+      await axios.post("http://localhost:5000/api/todos", {
+        title,
+        description,
+      });
+      setShowModal(false);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error adding todo:", error);
+    }
+  };
 
   const { todos, total, limit } = todosData;
 
@@ -70,32 +89,19 @@ export default function TodosPage() {
             borderRight: "1px solid #ddd",
           }}
         >
-          <div
+          <button
+            onClick={() => setShowModal(true)}
             style={{
-              display: "flex",
-              justifyContent: "space-around",
-              // display: "flex",
-              // alihnItems: "center",
-              // justifyContent: "center",
+              padding: "10px",
+              backgroundColor: "black",
+              color: "#fff",
+              width: "100%",
+              borderRadius: "5px",
+              marginBottom: "20px",
             }}
           >
-            <Link
-              href="/todos/new"
-              style={{
-                padding: "10px",
-                backgroundColor: "black",
-                color: "#fff",
-                width: "50%",
-                textAlign: "center",
-                borderRadius: "5px",
-                textDecoration: "none",
-                marginBottom: "20px",
-              }}
-            >
-              ➕ Add Todo
-            </Link>
-            <span>icon</span>
-          </div>
+            ➕ Add Todo
+          </button>
 
           {/* List of Todos */}
           <ul style={{ listStyle: "none", padding: 0 }}>
@@ -121,32 +127,6 @@ export default function TodosPage() {
               </li>
             ))}
           </ul>
-
-          {/* Pagination */}
-          <div
-            style={{
-              marginTop: "20px",
-              display: "flex",
-              gap: "10px",
-              justifyContent: "center",
-            }}
-          >
-            {Array.from({ length: Math.ceil(total / limit) }, (_, i) => (
-              <Link
-                key={i + 1}
-                href={`/todos?page=${i + 1}`}
-                style={{
-                  padding: "5px 10px",
-                  backgroundColor: "#0070f3",
-                  color: "#fff",
-                  borderRadius: "5px",
-                  textDecoration: "none",
-                }}
-              >
-                {i + 1}
-              </Link>
-            ))}
-          </div>
         </div>
 
         {/* Edit Todo Panel */}
@@ -159,112 +139,155 @@ export default function TodosPage() {
           }}
         >
           {selectedTodo ? (
-            <>
-              <h2 style={{ fontSize: "20px", marginBottom: "20px" }}>
-                ✏️ Edit Todo
-              </h2>
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.target);
-                  const title = formData.get("title");
-                  const description = formData.get("description");
-                  const id = selectedTodo._id;
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const title = formData.get("title");
+                const description = formData.get("description");
+                const id = selectedTodo._id;
 
-                  try {
-                    const response = await fetch(
-                      `http://localhost:5000/api/todos/${id}`,
-                      {
-                        method: "PUT",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ title, description }),
-                      }
-                    );
-
-                    if (response.ok) {
-                      window.location.href = `/todos?id=${id}`;
-                    } else {
-                      alert("Failed to update todo");
-                    }
-                  } catch (error) {
-                    console.error("Error:", error);
-                    alert("An error occurred while updating the todo");
-                  }
-                }}
+                try {
+                  await axios.put(`http://localhost:5000/api/todos/${id}`, {
+                    title,
+                    description,
+                  });
+                  window.location.reload();
+                } catch (error) {
+                  console.error("Error updating todo:", error);
+                }
+              }}
+            >
+              <input
+                type="text"
+                name="title"
+                defaultValue={selectedTodo.title}
+                required
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "10px",
+                  padding: "10px",
+                  fontSize: "16px",
+                  borderRadius: "5px",
+                  border: "1px solid #ddd",
+                }}
+              />
+              <textarea
+                name="description"
+                defaultValue={selectedTodo.description}
+                required
+                style={{
+                  padding: "10px",
+                  fontSize: "16px",
+                  borderRadius: "5px",
+                  border: "1px solid #ddd",
+                  minHeight: "100px",
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  padding: "10px",
+                  backgroundColor: "black",
+                  color: "#fff",
+                  width: "100px",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
                 }}
               >
-                <input
-                  type="text"
-                  name="title"
-                  defaultValue={selectedTodo.title}
-                  style={{
-                    padding: "10px",
-                    fontSize: "16px",
-                    borderRadius: "5px",
-                    border: "1px solid #ddd",
-                  }}
-                  required
-                />
-                <textarea
-                  name="description"
-                  defaultValue={selectedTodo.description}
-                  style={{
-                    padding: "10px",
-                    fontSize: "16px",
-                    borderRadius: "5px",
-                    border: "1px solid #ddd",
-                    minHeight: "100px",
-                  }}
-                  required
-                />
-                <button
-                  type="submit"
-                  style={{
-                    padding: "10px",
-                    backgroundColor: "black",
-                    color: "#fff",
-                    width: "100px",
-                    border: "none",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Update
-                </button>
-              </form>
-            </>
+                Update
+              </button>
+            </form>
           ) : (
-            <div style={{ margin: "10px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <h1
-                  style={{
-                    font: "bold",
-                    fontSize: "45px",
-                    marginBottom: "5px",
-                  }}
-                >
-                  {" "}
-                  New Additions
-                </h1>
-                icon
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                icon1, icon2, icon3, icon4, icon5
-              </div>
-              <hr
-                style={{ font: "45px", color: "gray", marginTop: "5px" }}
-              ></hr>
-              <p style={{ marginTop: "15px" }}>
-                Select a todo from the sidebar to edit.
-              </p>
-            </div>
+            <p>Select a todo from the sidebar to edit.</p>
           )}
         </div>
       </div>
+
+      {/* Modal for Adding Todo */}
+      {showModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              padding: "20px",
+              borderRadius: "5px",
+              width: "400px",
+            }}
+          >
+            <h2>Add New Todo</h2>
+            <form onSubmit={handleAddTodo}>
+              <input
+                type="text"
+                name="title"
+                placeholder="Title"
+                required
+                style={{
+                  padding: "10px",
+                  fontSize: "16px",
+                  borderRadius: "5px",
+                  border: "1px solid #ddd",
+                  marginBottom: "10px",
+                  width: "100%",
+                }}
+              />
+              <textarea
+                name="description"
+                placeholder="Description"
+                required
+                style={{
+                  padding: "10px",
+                  fontSize: "16px",
+                  borderRadius: "5px",
+                  border: "1px solid #ddd",
+                  minHeight: "100px",
+                  width: "100%",
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  padding: "10px",
+                  backgroundColor: "black",
+                  color: "#fff",
+                  width: "100%",
+                  border: "none",
+                  borderRadius: "5px",
+                  marginTop: "10px",
+                }}
+              >
+                Add Todo
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                style={{
+                  padding: "10px",
+                  backgroundColor: "gray",
+                  color: "#fff",
+                  width: "100%",
+                  border: "none",
+                  borderRadius: "5px",
+                  marginTop: "10px",
+                }}
+              >
+                Cancel
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }
