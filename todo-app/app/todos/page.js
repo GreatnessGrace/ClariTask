@@ -70,7 +70,15 @@ export default function TodosPage() {
             borderRight: "1px solid #ddd",
           }}
         >
-          <div style={{ display: "flex", justifyContent: "space-around" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-around",
+              // display: "flex",
+              // alihnItems: "center",
+              // justifyContent: "center",
+            }}
+          >
             <Link
               href="/todos/new"
               style={{
@@ -86,7 +94,7 @@ export default function TodosPage() {
             >
               ➕ Add Todo
             </Link>
-            <span>🗑️ Delete</span>
+            <span>icon</span>
           </div>
 
           {/* List of Todos */}
@@ -217,19 +225,43 @@ export default function TodosPage() {
                   type="submit"
                   style={{
                     padding: "10px",
-                    backgroundColor: "#0070f3",
+                    backgroundColor: "black",
                     color: "#fff",
+                    width: "100px",
                     border: "none",
                     borderRadius: "5px",
                     cursor: "pointer",
                   }}
                 >
-                  ✅ Update
+                  Update
                 </button>
               </form>
             </>
           ) : (
-            <p>Select a todo from the sidebar to edit.</p>
+            <div style={{ margin: "10px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <h1
+                  style={{
+                    font: "bold",
+                    fontSize: "45px",
+                    marginBottom: "5px",
+                  }}
+                >
+                  {" "}
+                  New Additions
+                </h1>
+                icon
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                icon1, icon2, icon3, icon4, icon5
+              </div>
+              <hr
+                style={{ font: "45px", color: "gray", marginTop: "5px" }}
+              ></hr>
+              <p style={{ marginTop: "15px" }}>
+                Select a todo from the sidebar to edit.
+              </p>
+            </div>
           )}
         </div>
       </div>

@@ -33,8 +33,9 @@ export default function NewTodoPage() {
           type="submit"
           style={{
             padding: "10px",
-            backgroundColor: "#0070f3",
+            backgroundColor: "black",
             color: "#fff",
+            width: "100px",
             border: "none",
             borderRadius: "5px",
             cursor: "pointer",
