@@ -26,6 +26,8 @@ export default function TodosPage() {
   });
   const [selectedTodo, setSelectedTodo] = React.useState(null);
   const [showModal, setShowModal] = React.useState(false);
+  const [editTitle, setEditTitle] = React.useState("");
+  const [editDescription, setEditDescription] = React.useState("");
 
   // Fetch Todos
   React.useEffect(() => {
@@ -42,6 +44,8 @@ export default function TodosPage() {
       const loadTodo = async () => {
         const data = await fetchTodo(selectedTodoId);
         setSelectedTodo(data);
+        setEditTitle(data.title);
+        setEditDescription(data.description);
       };
       loadTodo();
     }
@@ -62,6 +66,18 @@ export default function TodosPage() {
       window.location.reload();
     } catch (error) {
       console.error("Error adding todo:", error);
+    }
+  };
+
+  const handleUpdateTodo = async () => {
+    try {
+      await axios.put(`http://localhost:5000/api/todos/${selectedTodoId}`, {
+        title: editTitle,
+        description: editDescription,
+      });
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating todo:", error);
     }
   };
 
@@ -139,70 +155,47 @@ export default function TodosPage() {
           }}
         >
           {selectedTodo ? (
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const formData = new FormData(e.target);
-                const title = formData.get("title");
-                const description = formData.get("description");
-                const id = selectedTodo._id;
-
-                try {
-                  await axios.put(`http://localhost:5000/api/todos/${id}`, {
-                    title,
-                    description,
-                  });
-                  window.location.reload();
-                } catch (error) {
-                  console.error("Error updating todo:", error);
-                }
-              }}
-            >
+            <div style={{ margin: "10px" }}>
               <input
                 type="text"
-                name="title"
-                defaultValue={selectedTodo.title}
-                required
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
                 style={{
+                  fontSize: "45px",
+                  marginBottom: "5px",
+                  width: "100%",
                   padding: "10px",
-                  fontSize: "16px",
-                  borderRadius: "5px",
-                  border: "1px solid #ddd",
                 }}
               />
               <textarea
-                name="description"
-                defaultValue={selectedTodo.description}
-                required
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
                 style={{
+                  width: "100%",
                   padding: "10px",
-                  fontSize: "16px",
-                  borderRadius: "5px",
-                  border: "1px solid #ddd",
+                  marginTop: "15px",
                   minHeight: "100px",
                 }}
               />
               <button
-                type="submit"
+                onClick={handleUpdateTodo}
                 style={{
+                  marginTop: "10px",
                   padding: "10px",
                   backgroundColor: "black",
                   color: "#fff",
-                  width: "100px",
                   border: "none",
                   borderRadius: "5px",
-                  cursor: "pointer",
                 }}
               >
-                Update
+                Update Todo
               </button>
-            </form>
+            </div>
           ) : (
             <p>Select a todo from the sidebar to edit.</p>
           )}
         </div>
       </div>
-
       {/* Modal for Adding Todo */}
       {showModal && (
         <div
